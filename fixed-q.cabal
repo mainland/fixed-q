@@ -1,0 +1,63 @@
+name:          fixed-q
+version:       0.1
+cabal-version: >= 1.10
+license:       BSD3
+license-file:  LICENSE
+copyright:     (c) 2020 Drexel University
+author:        Geoffrey Mainland <mainland@drexel.edu>
+maintainer:    Geoffrey Mainland <mainland@drexel.edu>
+stability:     alpha
+homepage:      https://github.com/mainland/fixed-q
+bug-reports:   https://github.com/mainland/fixed-q/issues
+category:      Language
+synopsis:      VHDL quasiquoting library.
+tested-with:   GHC==8.0.2, GHC==8.2.2, GHC==8.4.4, GHC==8.6.5, GHC==8.8.3,
+               GHC==8.10.1
+
+description:
+  This package provides a general parser and quasiquoter for the VHDL language.
+
+build-type: Simple
+
+flag mpfr
+  description: Use MPFR to provide accurate arbitrary-precision computation.
+  default:     False
+  manual:      True
+
+library
+  default-language: Haskell2010
+
+  build-depends:
+    base >= 4.5 && < 5
+
+  if flag(mpfr)
+    build-depends: rounded >= 1.1 && < 1.2
+
+  exposed-modules:
+    Data.Fixed.Q
+
+  include-dirs: .
+
+  ghc-options: -Wall
+
+  if flag(mpfr)
+    cpp-options: -DMPFR
+
+test-suite unit
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   tests
+  main-is:          Main.hs
+
+  default-language: Haskell2010
+
+  build-depends:
+    fixed-q,
+    HUnit           >= 1.2 && < 1.7,
+    base            >= 4   && < 5,
+    hspec           >= 2.5 && < 2.8,
+    hspec-core      >= 2.5 && < 2.8,
+    QuickCheck      >= 2.13 && < 2.14
+
+source-repository head
+  type:     git
+  location: git://github.com/mainland/fixed-q.git
