@@ -44,6 +44,10 @@ class FiniteBits a => FixedBits a where
     -- | Number of bits use to represent fractional portion of fixed-point number.
     fracBitSize :: a -> Int
 
+    -- | Unit in the last place
+    ulp :: a
+    ulp = bit 0
+
 -- | Unsigned Q format fixed-point number with @m@ integer bits and @f@
 -- fractional bits.
 newtype UQ (m :: Nat) (f :: Nat) = UQ { unUQ :: Integer }
