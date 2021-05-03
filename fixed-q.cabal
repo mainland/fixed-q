@@ -56,7 +56,7 @@ test-suite unit
     base            >= 4   && < 5,
     hspec           >= 2.5 && < 2.8,
     hspec-core      >= 2.5 && < 2.8,
-    QuickCheck      >= 2.13 && < 2.14
+    QuickCheck      >= 2.13 && < 2.15
 
 source-repository head
   type:     git
