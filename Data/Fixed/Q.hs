@@ -46,7 +46,7 @@ class FiniteBits a => FixedBits a where
 
 -- | Unsigned Q format fixed-point number with @m@ integer bits and @f@
 -- fractional bits.
-newtype UQ (m :: Nat) (f :: Nat) = UQ Integer
+newtype UQ (m :: Nat) (f :: Nat) = UQ { unUQ :: Integer }
   deriving (Eq, Ord)
 
 mkUQ :: forall m f . (KnownNat m, KnownNat f) => Integer -> UQ m f
@@ -167,7 +167,7 @@ instance (KnownNat m, KnownNat f, f ~ (1+f')) => RealFrac (UQ m f) where
 
 -- | Signed Q format fixed-point number with @m@ integer bits and @f@ fractional
 -- bits.
-newtype Q (m :: Nat) (f :: Nat) = Q Integer
+newtype Q (m :: Nat) (f :: Nat) = Q { unQ :: Integer }
   deriving (Eq, Ord)
 
 mkQ :: forall m f . (KnownNat m, KnownNat f) => Integer -> Q m f
