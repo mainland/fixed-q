@@ -77,7 +77,7 @@ instance (KnownNat m, KnownNat f) => Bits (UQ m f) where
     UQ x .|.   UQ y = UQ (x .|. y)
     UQ x `xor` UQ y = UQ (x `xor` y)
 
-    complement (UQ x) = mkUQ (complement x)
+    complement x@(UQ i) = mkUQ (complement i + 2^finiteBitSize x)
 
     zeroBits = UQ 0
 
