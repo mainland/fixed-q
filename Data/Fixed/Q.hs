@@ -24,7 +24,10 @@ module Data.Fixed.Q (
     FixedBits(..),
 
     UQ(..),
-    Q(..)
+    Q(..),
+
+    isZeroNat,
+    isLteNat
   ) where
 
 import Data.Bits
