@@ -1,16 +1,18 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 -- |
 -- Module      :  Data.Fixed.Q
--- Copyright   :  (c) 2020 Drexel University
+-- Copyright   :  (c) 2020-2021 Drexel University
 -- License     :  BSD-style
 -- Maintainer  :  mainland@drexel.edu
 -- Stability   :  experimental
