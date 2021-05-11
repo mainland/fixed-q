@@ -148,7 +148,7 @@ instance KnownNat m => Integral (UQ m 0) where
       where
         (q, r) = quotRem x y
 
-instance (KnownNat m, KnownNat f, f ~ (1+f')) => Fractional (UQ m f) where
+instance (KnownNat m, KnownNat f, 1 <= f) => Fractional (UQ m f) where
     fromRational r = mkUQ (numerator r * 2^fracbits `div` denominator r)
       where
         fracbits :: Int
@@ -159,7 +159,7 @@ instance (KnownNat m, KnownNat f, f ~ (1+f')) => Fractional (UQ m f) where
         fracbits :: Int
         fracbits = fracBitSize (undefined :: UQ m f)
 
-instance (KnownNat m, KnownNat f, f ~ (1+f')) => RealFrac (UQ m f) where
+instance (KnownNat m, KnownNat f, 1 <= f) => RealFrac (UQ m f) where
     properFraction x = (i, x - fromIntegral i)
       where
         i = truncate x
@@ -280,10 +280,10 @@ instance KnownNat m => Integral (Q m 0) where
         (q, r) = quotRem x y
 
 #if MPFR
-instance (KnownNat m, KnownNat f, KnownNat (m+f), f ~ (1+f')) => Fractional (Q m f) where
+instance (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f) => Fractional (Q m f) where
     fromRational r = mkQ (round (fromRational r * 2^fracbits :: Rounded 'TowardNearest (m+f)))
 #else /* !defined(MPFR) */
-instance (KnownNat m, KnownNat f, f ~ (1+f')) => Fractional (Q m f) where
+instance (KnownNat m, KnownNat f, 1 <= f) => Fractional (Q m f) where
     fromRational r = mkQ (round (fromRational r * 2^fracbits :: Double))
 #endif /* !defined(MPFR) */
       where
@@ -295,7 +295,7 @@ instance (KnownNat m, KnownNat f, f ~ (1+f')) => Fractional (Q m f) where
         fracbits :: Int
         fracbits = fracBitSize (undefined :: Q m f)
 
-instance (KnownNat m, KnownNat f, KnownNat (m+f), f ~ (1+f')) => RealFrac (Q m f) where
+instance (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f) => RealFrac (Q m f) where
     properFraction x = (i, x - fromIntegral i) where
         i = truncate x
 
@@ -307,52 +307,52 @@ instance (KnownNat m, KnownNat f, KnownNat (m+f), f ~ (1+f')) => RealFrac (Q m f
 #if defined(MPFR)
 type R = 'TowardNearest
 
-liftUQ0 :: (KnownNat m, KnownNat f, KnownNat (m+f), f ~ (1+f'))
+liftUQ0 :: (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f)
         => Rounded R (m+f)
         -> UQ m f
 liftUQ0 x = fromRational (toRational x)
 
-liftUQ1 :: (KnownNat m, KnownNat f, KnownNat (m+f), f ~ (1+f'))
+liftUQ1 :: (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f)
         => (Rounded R (m+f) -> Rounded R (m+f))
         -> UQ m f
         -> UQ m f
 liftUQ1 f x = fromRational (toRational (f (fromRational (toRational x))))
 
-liftQ0 :: (KnownNat m, KnownNat f, KnownNat (m+f), KnownNat (1+m+f), f ~ (1+f'))
+liftQ0 :: (KnownNat m, KnownNat f, KnownNat (m+f), KnownNat (1+m+f), 1 <= f)
        => Rounded R (1+m+f)
        -> Q m f
 liftQ0 x = fromRational (toRational x)
 
-liftQ1 :: (KnownNat m, KnownNat f, KnownNat (m+f), KnownNat (1+m+f), f ~ (1+f'))
+liftQ1 :: (KnownNat m, KnownNat f, KnownNat (m+f), KnownNat (1+m+f), 1 <= f)
        => (Rounded R (1+m+f) -> Rounded R (1+m+f))
        -> Q m f
        -> Q m f
 liftQ1 f x = fromRational (toRational (f (fromRational (toRational x))))
 #else /* !defined(MPFR) */
-liftUQ0 :: (KnownNat m, KnownNat f, KnownNat (m+f), f ~ (1+f'))
+liftUQ0 :: (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f)
         => Double
         -> UQ m f
 liftUQ0 x = fromRational (toRational x)
 
-liftUQ1 :: (KnownNat m, KnownNat f, KnownNat (m+f), f ~ (1+f'))
+liftUQ1 :: (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f)
         => (Double -> Double)
         -> UQ m f
         -> UQ m f
 liftUQ1 f x = fromRational (toRational (f (fromRational (toRational x))))
 
-liftQ0 :: (KnownNat m, KnownNat f, KnownNat (1+m+f), f ~ (1+f'))
+liftQ0 :: (KnownNat m, KnownNat f, KnownNat (1+m+f), 1 <= f)
        => Double
        -> Q m f
 liftQ0 x = fromRational (toRational x)
 
-liftQ1 :: (KnownNat m, KnownNat f, KnownNat (1+m+f), f ~ (1+f'))
+liftQ1 :: (KnownNat m, KnownNat f, KnownNat (1+m+f), 1 <= f)
        => (Double -> Double)
        -> Q m f
        -> Q m f
 liftQ1 f x = fromRational (toRational (f (fromRational (toRational x))))
 #endif /* !defined(MPFR) */
 
-instance (KnownNat m, KnownNat f, KnownNat (m+f), f ~ (1+f')) => Floating (UQ m f) where
+instance (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f) => Floating (UQ m f) where
     pi = liftUQ0 pi
     exp = liftUQ1 exp
     log = liftUQ1 log
@@ -367,7 +367,7 @@ instance (KnownNat m, KnownNat f, KnownNat (m+f), f ~ (1+f')) => Floating (UQ m 
     acosh = liftUQ1 acosh
     atanh = liftUQ1 atanh
 
-instance (KnownNat m, KnownNat f, KnownNat (m+f), KnownNat (1+m+f), f ~ (1+f')) => Floating (Q m f) where
+instance (KnownNat m, KnownNat f, KnownNat (m+f), KnownNat (1+m+f), 1 <= f) => Floating (Q m f) where
     pi = liftQ0 pi
     exp = liftQ1 exp
     log = liftQ1 log
