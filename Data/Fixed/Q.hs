@@ -28,12 +28,16 @@ module Data.Fixed.Q (
   ) where
 
 import Data.Bits
-import Data.Proxy
-import Data.Ratio (denominator, numerator, (%))
-import GHC.TypeLits
+import Data.Proxy ( Proxy(..) )
+import Data.Ratio ( (%), denominator, numerator )
+import Data.Type.Equality ( type (:~:)(..) )
+import GHC.TypeNats ( KnownNat, Nat, type (+), type (<=?), natVal, type (<=) )
 #if defined(MPFR)
 import Numeric.Rounded
 #endif /* defined(MPFR) */
+import Test.QuickCheck
+    ( Arbitrary(..), arbitrarySizedBoundedIntegral, arbitrarySizedFractional )
+import Unsafe.Coerce ( unsafeCoerce )
 
 -- | The 'FixedBits' class denotes fixed-point types with finite bits.
 class FiniteBits a => FixedBits a where
@@ -383,3 +387,39 @@ instance (KnownNat m, KnownNat f, KnownNat (m+f), KnownNat (1+m+f), 1 <= f) => F
     asinh = liftQ1 asinh
     acosh = liftQ1 acosh
     atanh = liftQ1 atanh
+
+-- | Return a type-level proof that 'n ~ 0'
+isZeroNat :: forall n. KnownNat n => Maybe (n :~: 0)
+isZeroNat | n == 0    = Just (unsafeCoerce Refl)
+          | otherwise = Nothing
+  where
+    n = natVal (Proxy :: Proxy n)
+
+-- | Return a type-level proof that 'm <=? n'
+isLteNat :: forall m n. (KnownNat m, KnownNat n) => Maybe ((m <=? n) :~: 'True)
+isLteNat | m <= n    = Just (unsafeCoerce Refl)
+         | otherwise = Nothing
+  where
+    m = natVal (Proxy :: Proxy m)
+    n = natVal (Proxy :: Proxy n)
+
+instance (KnownNat m, KnownNat f) => Arbitrary (Q m f) where
+    arbitrary = case isZeroNat @f of
+                  Just Refl -> arbitrarySizedBoundedIntegral
+                  Nothing   -> case isLteNat @1 @f of
+                                 Just Refl -> arbitrarySizedFractional
+                                 Nothing   -> error "can't happen"
+
+    shrink (Q i) | i > 0     = [Q (i-1)]
+                 | i < 0     = [Q (i+1)]
+                 | otherwise = []
+
+instance (KnownNat m, KnownNat f) => Arbitrary (UQ m f) where
+    arbitrary = case isZeroNat @f of
+                  Just Refl -> arbitrarySizedBoundedIntegral
+                  Nothing   -> case isLteNat @1 @f of
+                                 Just Refl -> arbitrarySizedFractional
+                                 Nothing   -> error "can't happen"
+
+    shrink (UQ i) | i > 0     = [UQ (i-1)]
+                  | otherwise = []
