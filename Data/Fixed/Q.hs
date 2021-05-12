@@ -9,6 +9,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.KnownNat.Solver #-}
 
 -- |
 -- Module      :  Data.Fixed.Q
@@ -65,12 +66,7 @@ newtype UQ (m :: Nat) (f :: Nat) = UQ { unUQ :: Integer }
 mkUQ :: forall m f . (KnownNat m, KnownNat f) => Integer -> UQ m f
 mkUQ x = UQ (x `mod` (2 ^ finiteBitSize (undefined :: UQ m f)))
 
-#if MPFR
-instance (KnownNat m, KnownNat f, KnownNat (m + f)) => Show (UQ m f) where
-#else /* !defined(MPFR) */
 instance (KnownNat m, KnownNat f) => Show (UQ m f) where
-#endif /* !defined(MPFR) */
-
     show (UQ x) | fracbits == 0 = show x
 #if MPFR
                 | otherwise     = show (fromIntegral x / 2 ^ fracbits :: Rounded 'TowardNearest (m+f))
@@ -190,11 +186,7 @@ mkQ x | even q    = Q r
     (q, r) = divMod x m
     m = 2 ^ finiteBitSize (undefined :: UQ m f)
 
-#if MPFR
-instance (KnownNat m, KnownNat f, KnownNat (m + f)) => Show (Q m f) where
-#else /* !defined(MPFR) */
 instance (KnownNat m, KnownNat f) => Show (Q m f) where
-#endif /* !defined(MPFR) */
 
     show (Q x) | fracbits == 0 = show x
 #if MPFR
@@ -288,11 +280,10 @@ instance KnownNat m => Integral (Q m 0) where
       where
         (q, r) = quotRem x y
 
+instance (KnownNat m, KnownNat f, 1 <= f) => Fractional (Q m f) where
 #if MPFR
-instance (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f) => Fractional (Q m f) where
     fromRational r = mkQ (round (fromRational r * 2^fracbits :: Rounded 'TowardNearest (m+f)))
 #else /* !defined(MPFR) */
-instance (KnownNat m, KnownNat f, 1 <= f) => Fractional (Q m f) where
     fromRational r = mkQ (round (fromRational r * 2^fracbits :: Double))
 #endif /* !defined(MPFR) */
       where
@@ -304,7 +295,7 @@ instance (KnownNat m, KnownNat f, 1 <= f) => Fractional (Q m f) where
         fracbits :: Int
         fracbits = fracBitSize (undefined :: Q m f)
 
-instance (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f) => RealFrac (Q m f) where
+instance (KnownNat m, KnownNat f, 1 <= f) => RealFrac (Q m f) where
     properFraction x = (i, x - fromIntegral i) where
         i = truncate x
 
@@ -321,47 +312,47 @@ liftUQ0 :: (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f)
         -> UQ m f
 liftUQ0 x = fromRational (toRational x)
 
-liftUQ1 :: (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f)
+liftUQ1 :: (KnownNat m, KnownNat f, 1 <= f)
         => (Rounded R (m+f) -> Rounded R (m+f))
         -> UQ m f
         -> UQ m f
 liftUQ1 f x = fromRational (toRational (f (fromRational (toRational x))))
 
-liftQ0 :: (KnownNat m, KnownNat f, KnownNat (m+f), KnownNat (1+m+f), 1 <= f)
+liftQ0 :: (KnownNat m, KnownNat f, 1 <= f)
        => Rounded R (1+m+f)
        -> Q m f
 liftQ0 x = fromRational (toRational x)
 
-liftQ1 :: (KnownNat m, KnownNat f, KnownNat (m+f), KnownNat (1+m+f), 1 <= f)
+liftQ1 :: (KnownNat m, KnownNat f, 1 <= f)
        => (Rounded R (1+m+f) -> Rounded R (1+m+f))
        -> Q m f
        -> Q m f
 liftQ1 f x = fromRational (toRational (f (fromRational (toRational x))))
 #else /* !defined(MPFR) */
-liftUQ0 :: (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f)
+liftUQ0 :: (KnownNat m, KnownNat f, 1 <= f)
         => Double
         -> UQ m f
 liftUQ0 x = fromRational (toRational x)
 
-liftUQ1 :: (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f)
+liftUQ1 :: (KnownNat m, KnownNat f, 1 <= f)
         => (Double -> Double)
         -> UQ m f
         -> UQ m f
 liftUQ1 f x = fromRational (toRational (f (fromRational (toRational x))))
 
-liftQ0 :: (KnownNat m, KnownNat f, KnownNat (1+m+f), 1 <= f)
+liftQ0 :: (KnownNat m, KnownNat f, 1 <= f)
        => Double
        -> Q m f
 liftQ0 x = fromRational (toRational x)
 
-liftQ1 :: (KnownNat m, KnownNat f, KnownNat (1+m+f), 1 <= f)
+liftQ1 :: (KnownNat m, KnownNat f, 1 <= f)
        => (Double -> Double)
        -> Q m f
        -> Q m f
 liftQ1 f x = fromRational (toRational (f (fromRational (toRational x))))
 #endif /* !defined(MPFR) */
 
-instance (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f) => Floating (UQ m f) where
+instance (KnownNat m, KnownNat f, 1 <= f) => Floating (UQ m f) where
     pi = liftUQ0 pi
     exp = liftUQ1 exp
     log = liftUQ1 log
@@ -376,7 +367,7 @@ instance (KnownNat m, KnownNat f, KnownNat (m+f), 1 <= f) => Floating (UQ m f) w
     acosh = liftUQ1 acosh
     atanh = liftUQ1 atanh
 
-instance (KnownNat m, KnownNat f, KnownNat (m+f), KnownNat (1+m+f), 1 <= f) => Floating (Q m f) where
+instance (KnownNat m, KnownNat f, 1 <= f) => Floating (Q m f) where
     pi = liftQ0 pi
     exp = liftQ1 exp
     log = liftQ1 log
