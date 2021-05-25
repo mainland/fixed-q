@@ -54,6 +54,9 @@ class FiniteBits a => FixedBits a where
     -- | Number of bits use to represent fractional portion of fixed-point number.
     fracBitSize :: a -> Int
 
+    -- | Sign bit
+    signBit :: a -> Int
+
     -- | Unit in the last place
     ulp :: a
     ulp = bit 0
@@ -115,6 +118,8 @@ instance (KnownNat m, KnownNat f) => FixedBits (UQ m f) where
     intBitSize _ = fromIntegral $ natVal (Proxy :: Proxy m)
 
     fracBitSize _ = fromIntegral $ natVal (Proxy :: Proxy f)
+
+    signBit _ = 0
 
 instance (KnownNat m, KnownNat f) => Enum (UQ m f) where
     fromEnum (UQ x) = fromEnum x
@@ -240,6 +245,10 @@ instance (KnownNat m, KnownNat f) => FixedBits (Q m f) where
     intBitSize _ = fromIntegral $ natVal (Proxy :: Proxy m)
 
     fracBitSize _ = fromIntegral $ natVal (Proxy :: Proxy f)
+
+    signBit x
+      | x >= 0    = 0
+      | otherwise = 1
 
 instance (KnownNat m, KnownNat f) => Enum (Q m f) where
     fromEnum (Q x) = fromEnum x
