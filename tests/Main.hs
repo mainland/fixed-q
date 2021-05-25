@@ -26,8 +26,8 @@ main = hspec spec
 
 spec :: Spec
 spec = do
-    describe "Q (signed)" uqspec
-    describe "Unsigned Q" qspec
+    describe "UQ (unsigned)" uqspec
+    describe "Q (signed)" qspec
 
 uqspec :: Spec
 uqspec = do
@@ -38,6 +38,12 @@ uqspec = do
     it "bit shift" $ property prop_uq_shift
     it "bit rotate" $ property prop_uq_rotate
     it "bit popCount" $ property prop_uq_popCount
+    describe "abs" $ do
+      it "abs (0 :: UQ 0 3)"      $ abs (0 :: UQ 0 3) @?= 0
+      it "abs (0.125 :: UQ 0 3)"  $ abs (0.125 :: UQ 0 3) @?= 0.125
+    describe "signum" $ do
+      it "signum (0 :: UQ 1 3)"      $ signum (0 :: UQ 1 3) @?= 0
+      it "signum (0.125 :: UQ 1 3)"  $ signum (0.125 :: UQ 1 3) @?= 1
 
 qspec :: Spec
 qspec = do
@@ -48,6 +54,14 @@ qspec = do
     it "bit shift" $ property prop_q_shift
     it "bit rotate" $ property prop_q_rotate
     it "bit popCount" $ property prop_q_popCount
+    describe "abs" $ do
+      it "abs (-0.375 :: Q 0 3)" $ abs (-0.375 :: Q 0 3) @?= 0.375
+      it "abs (0 :: Q 0 3)"      $ abs (0 :: Q 0 3) @?= 0
+      it "abs (0.125 :: Q 0 3)"  $ abs (0.125 :: Q 0 3) @?= 0.125
+    describe "signum" $ do
+      it "signum (-0.375 :: Q 1 3)" $ signum (-0.375 :: Q 1 3) @?= -1
+      it "signum (0 :: Q 1 3)"      $ signum (0 :: Q 1 3) @?= 0
+      it "signum (0.125 :: Q 1 3)"  $ signum (0.125 :: Q 1 3) @?= 1
 
 testBits1 :: (Bits a, Integral a, Bits b, Show b)
           => (Integer -> b)

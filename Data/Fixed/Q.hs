@@ -132,9 +132,11 @@ instance (KnownNat m, KnownNat f) => Num (UQ m f) where
         fracbits :: Int
         fracbits = fracBitSize (undefined :: UQ m f)
 
-    abs x         = x
+    abs x = x
+
     signum (UQ 0) = 0
     signum _      = 1
+
     fromInteger i = mkUQ (i `shift` fracbits)
       where
         fracbits :: Int
@@ -260,8 +262,12 @@ instance (KnownNat m, KnownNat f) => Num (Q m f) where
         fracbits :: Int
         fracbits = fracBitSize (undefined :: Q m f)
 
-    abs (Q x)     = mkQ (abs x)
-    signum (Q x)  = Q (signum x)
+    abs (Q x) = Q (abs x)
+
+    signum (Q x) | x < 0     = -1
+                 | x == 0    = 0
+                 | otherwise = 1
+
     fromInteger i = mkQ (i `shift` fracbits)
       where
         fracbits :: Int
