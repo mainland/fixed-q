@@ -3,6 +3,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -23,6 +24,7 @@
 
 module Data.Fixed.Q (
     FixedBits(..),
+    FixedCast(..),
 
     UQ(..),
     Q(..),
@@ -60,6 +62,10 @@ class FiniteBits a => FixedBits a where
     -- | Unit in the last place
     ulp :: a
     ulp = bit 0
+
+-- | Cast between fixed types.
+class FixedCast a b where
+    fixedCast :: a -> b
 
 -- | Unsigned Q format fixed-point number with @m@ integer bits and @f@
 -- fractional bits.
@@ -120,6 +126,9 @@ instance (KnownNat m, KnownNat f) => FixedBits (UQ m f) where
     fracBitSize _ = fromIntegral $ natVal (Proxy :: Proxy f)
 
     signBit _ = 0
+
+instance (KnownNat f, KnownNat f') => FixedCast (UQ m f) (UQ m' f') where
+    fixedCast (UQ x) = UQ (x `shift` fromIntegral (natVal (Proxy :: Proxy f') - natVal (Proxy :: Proxy f)))
 
 instance (KnownNat m, KnownNat f) => Enum (UQ m f) where
     fromEnum (UQ x) = fromEnum x
@@ -249,6 +258,9 @@ instance (KnownNat m, KnownNat f) => FixedBits (Q m f) where
     signBit x
       | x >= 0    = 0
       | otherwise = 1
+
+instance (KnownNat f, KnownNat f') => FixedCast (Q m f) (Q m' f') where
+    fixedCast (Q x) = Q (x `shift` fromIntegral (natVal (Proxy :: Proxy f') - natVal (Proxy :: Proxy f)))
 
 instance (KnownNat m, KnownNat f) => Enum (Q m f) where
     fromEnum (Q x) = fromEnum x
