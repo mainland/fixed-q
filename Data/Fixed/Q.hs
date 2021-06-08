@@ -37,7 +37,7 @@ import Data.Bits
 import Data.Proxy ( Proxy(..) )
 import Data.Ratio ( (%), denominator, numerator )
 import Data.Type.Equality ( type (:~:)(..) )
-import GHC.TypeNats ( KnownNat, Nat, type (+), type (<=?), natVal, type (<=) )
+import GHC.TypeLits ( KnownNat, Nat, type (+), type (<=?), natVal, type (<=) )
 #if defined(MPFR)
 import Numeric.Rounded
 #endif /* defined(MPFR) */
