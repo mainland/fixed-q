@@ -26,6 +26,9 @@ module Data.Fixed.Q (
     FixedBits(..),
     FixedCast(..),
 
+    Unsigned,
+    Signed,
+
     UQ(..),
     Q(..),
 
@@ -66,6 +69,10 @@ class FiniteBits a => FixedBits a where
 -- | Cast between fixed types.
 class FixedCast a b where
     fixedCast :: a -> b
+
+type Unsigned n = UQ n 0
+
+type Signed n = Q n 0
 
 -- | Unsigned Q format fixed-point number with @m@ integer bits and @f@
 -- fractional bits.
