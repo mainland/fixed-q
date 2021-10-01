@@ -177,7 +177,11 @@ instance KnownNat m => Integral (UQ m 0) where
         (q, r) = quotRem x y
 
 instance (KnownNat m, KnownNat f, 1 <= f) => Fractional (UQ m f) where
-    fromRational r = mkUQ (numerator r * 2^fracbits `div` denominator r)
+#if MPFR
+    fromRational r = mkUQ (round (fromRational r * 2^fracbits :: Rounded 'TowardNearest (m+f)))
+#else /* !defined(MPFR) */
+    fromRational r = mkUQ (round (fromRational r * 2^fracbits :: Double))
+#endif /* !defined(MPFR) */
       where
         fracbits :: Int
         fracbits = fracBitSize (undefined :: UQ m f)

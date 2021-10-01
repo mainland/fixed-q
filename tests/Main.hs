@@ -44,6 +44,8 @@ uqspec = do
     describe "signum" $ do
       it "signum (0 :: UQ 1 3)"      $ signum (0 :: UQ 1 3) @?= 0
       it "signum (0.125 :: UQ 1 3)"  $ signum (0.125 :: UQ 1 3) @?= 1
+    describe "rounding" $
+      it "0.99" $ (0.99 :: UQ 1 1) @?= 1.0
 
 qspec :: Spec
 qspec = do
@@ -62,6 +64,8 @@ qspec = do
       it "signum (-0.375 :: Q 1 3)" $ signum (-0.375 :: Q 1 3) @?= -1
       it "signum (0 :: Q 1 3)"      $ signum (0 :: Q 1 3) @?= 0
       it "signum (0.125 :: Q 1 3)"  $ signum (0.125 :: Q 1 3) @?= 1
+    describe "rounding" $
+      it "0.99" $ (0.99 :: Q 1 1) @?= 1.0
 
 testBits1 :: (Bits a, Integral a, Bits b, Show b)
           => (Integer -> b)
