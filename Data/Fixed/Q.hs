@@ -210,7 +210,6 @@ mkQ x | even q    = Q r
     m = 2 ^ finiteBitSize (undefined :: UQ m f)
 
 instance (KnownNat m, KnownNat f) => Show (Q m f) where
-
     show (Q x) | fracbits == 0 = show x
 #if MPFR
                | otherwise     = show (fromIntegral x / 2 ^ fracbits :: Rounded 'TowardNearest (m+f))
